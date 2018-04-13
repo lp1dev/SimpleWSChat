@@ -17,7 +17,11 @@
         console.log('init ::')
         webSocket = new WebSocket('ws://127.0.0.1:8080')
         webSocket.onmessage = function(message) {
-            console.log('ws :: got a message', message)
+            var parsedMessage = JSON.parse(message.data)
+            console.log('ws :: got a message', parsedMessage)
+            var chatArea = document.getElementById('chat-area')
+            chatArea.innerHTML += '<div>'+ parsedMessage.author +
+                ': ' + parsedMessage.data + '</div>'
             
         }
     }

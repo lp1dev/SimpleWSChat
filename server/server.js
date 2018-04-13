@@ -20,25 +20,35 @@
 */
 
 const WebSocket = require('ws')
-
+const users = [] // Contient les websockets crées avec les utilisateurs
 const wss = new WebSocket.Server({ port: 8080 })
 
+function dispatchAll(message) {
+    console.log('dispatchAll ::', message)
+    users.forEach(function (ws) {
+        ws.send(JSON.stringify(message))
+    })
+}
 
+function onMessage(message) {
+    const parsedMessage = JSON.parse(message)        
+    console.log(`${parsedMessage.author}: ${parsedMessage.data}`)
+    dispatchAll(parsedMessage)
+    if (parsedMessage.type === 0) {
+        var response = {
+            author: 'Server',
+            data: 'Coucou :)',
+                type: 0
+        }
+        //ws.send(JSON.stringify(response))
+    }    
+}
 
 wss.on('connection', function (ws) {
+    users.push(ws)
+    console.log('users', users.length)
     console.log('wss :: connection')
-    ws.on('message', function (message) {
-        const parsedMessage = JSON.parse(message)        
-        console.log(`${parsedMessage.author}: ${parsedMessage.data}`)
-        if (parsedMessage.type === 0) {
-            var response = {
-                author: 'Server',
-                data: 'Coucou :)',
-                type: 0
-            }
-            ws.send(JSON.stringify(response))
-        }
-    })
+    ws.on('message', onMessage)
 })
 
 console.log('WebSocket Server :: listening on port 8080')
